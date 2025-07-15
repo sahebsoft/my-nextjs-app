@@ -72,6 +72,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
       role="article"
       aria-labelledby={`product-${product.id}-name`}
       aria-describedby={`product-${product.id}-description`}
+      data-testid="product-card"
     >
       {/* Product Image */}
       <div className="relative h-48 bg-gray-200">

@@ -11,6 +11,17 @@
 import { Page } from 'puppeteer';
 
 /**
+ * Extend Window interface to include claude property
+ */
+declare global {
+  interface Window {
+    claude?: {
+      complete: (prompt: string) => Promise<string>;
+    };
+  }
+}
+
+/**
  * Interface for Claude API communication
  */
 interface ClaudeRequest {
@@ -53,9 +64,12 @@ export class ClaudeAITester {
     
     try {
       // Use window.claude.complete to send the analysis request
-      const response = await this.page.evaluate(async (analysisPrompt) => {
+      const response = await this.page.evaluate((analysisPrompt) => {
         // @ts-ignore - window.claude is available in the environment
-        return await window.claude.complete(analysisPrompt);
+        if (typeof window !== 'undefined' && window.claude && window.claude.complete) {
+          return window.claude.complete(analysisPrompt);
+        }
+        return Promise.resolve('Claude API not available');
       }, prompt);
 
       return this.parseClaudeResponse(response);
@@ -268,9 +282,12 @@ Make the tests more robust by:
 Return only the improved test code, one test per response block.`;
 
     try {
-      const refinedCode = await this.page.evaluate(async (prompt) => {
+      const refinedCode = await this.page.evaluate((prompt) => {
         // @ts-ignore
-        return await window.claude.complete(prompt);
+        if (typeof window !== 'undefined' && window.claude && window.claude.complete) {
+          return window.claude.complete(prompt);
+        }
+        return Promise.resolve('Claude API not available');
       }, refinementPrompt);
 
       return this.extractTestCodes(refinedCode);
@@ -356,9 +373,12 @@ Respond with JSON:
 }`;
 
     try {
-      const verification = await this.page.evaluate(async (prompt) => {
+      const verification = await this.page.evaluate((prompt) => {
         // @ts-ignore
-        return await window.claude.complete(prompt);
+        if (typeof window !== 'undefined' && window.claude && window.claude.complete) {
+          return window.claude.complete(prompt);
+        }
+        return Promise.resolve('Claude API not available');
       }, verificationPrompt);
 
       return this.parseClaudeResponse(verification);
@@ -394,9 +414,12 @@ Generate 3-5 new test cases that:
 Return only the test code, one test per block.`;
 
     try {
-      const additionalTests = await this.page.evaluate(async (prompt) => {
+      const additionalTests = await this.page.evaluate((prompt) => {
         // @ts-ignore
-        return await window.claude.complete(prompt);
+        if (typeof window !== 'undefined' && window.claude && window.claude.complete) {
+          return window.claude.complete(prompt);
+        }
+        return Promise.resolve('Claude API not available');
       }, additionalTestPrompt);
 
       return this.extractTestCodes(additionalTests);
@@ -429,11 +452,13 @@ export class AITestExecutor {
       testName,
       testCode,
       startTime: Date.now(),
-      screenshots: [],
-      consoleLogs: [],
-      networkRequests: [],
-      errors: [],
-      result: 'pending'
+      screenshots: [] as string[],
+      consoleLogs: [] as string[],
+      networkRequests: [] as string[],
+      errors: [] as any[],
+      result: 'pending' as string,
+      endTime: 0 as number,
+      duration: 0 as number
     };
 
     try {

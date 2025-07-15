@@ -10,16 +10,42 @@ export async function GET(
   
   console.log(`🖼️ Placeholder image requested: ${width}x${height}`)
   
-  // Create a simple SVG placeholder
+  // Create a more realistic product image placeholder
+  const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
+  const randomColor = colors[Math.floor(Math.random() * colors.length)]
+  
   const svg = `
     <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-      <rect width="100%" height="100%" fill="#f3f4f6"/>
-      <rect x="10%" y="10%" width="80%" height="60%" fill="#e5e7eb" rx="8"/>
-      <circle cx="30%" cy="35%" r="8%" fill="#d1d5db"/>
-      <rect x="50%" y="25%" width="30%" height="4%" fill="#d1d5db" rx="2"/>
-      <rect x="50%" y="35%" width="20%" height="4%" fill="#d1d5db" rx="2"/>
-      <rect x="50%" y="45%" width="25%" height="4%" fill="#d1d5db" rx="2"/>
-      <text x="50%" y="85%" text-anchor="middle" fill="#9ca3af" font-family="Arial" font-size="14">
+      <defs>
+        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:${randomColor};stop-opacity:0.1" />
+          <stop offset="100%" style="stop-color:${randomColor};stop-opacity:0.3" />
+        </linearGradient>
+        <linearGradient id="product" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:${randomColor};stop-opacity:0.8" />
+          <stop offset="100%" style="stop-color:${randomColor};stop-opacity:0.6" />
+        </linearGradient>
+      </defs>
+      
+      <rect width="100%" height="100%" fill="url(#bg)"/>
+      
+      <!-- Product shape -->
+      <rect x="20%" y="20%" width="60%" height="50%" fill="url(#product)" rx="8"/>
+      
+      <!-- Product details -->
+      <circle cx="35%" cy="35%" r="3%" fill="white" opacity="0.8"/>
+      <rect x="45%" y="30%" width="25%" height="3%" fill="white" opacity="0.8" rx="1"/>
+      <rect x="45%" y="38%" width="20%" height="3%" fill="white" opacity="0.6" rx="1"/>
+      <rect x="45%" y="46%" width="15%" height="3%" fill="white" opacity="0.4" rx="1"/>
+      
+      <!-- Brand badge -->
+      <rect x="5%" y="5%" width="25%" height="12%" fill="white" opacity="0.9" rx="4"/>
+      <text x="17.5%" y="12%" text-anchor="middle" fill="${randomColor}" font-family="Arial" font-size="10" font-weight="bold">
+        DEMO
+      </text>
+      
+      <!-- Size indicator -->
+      <text x="50%" y="90%" text-anchor="middle" fill="#6B7280" font-family="Arial" font-size="12" opacity="0.7">
         ${width} × ${height}
       </text>
     </svg>

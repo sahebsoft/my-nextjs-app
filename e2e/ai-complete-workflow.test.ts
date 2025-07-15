@@ -172,13 +172,24 @@ describe('🤖 Complete AI Autonomous Testing Workflow', () => {
               jquery: !!window.jQuery
             },
             cssFrameworks: {
-              tailwind: Array.from(document.styleSheets).some(sheet => {
-                try {
-                  return Array.from(sheet.cssRules).some(rule => 
-                    rule.cssText.includes('tailwind')
-                  );
-                } catch { return false; }
-              }),
+              tailwind: (() => {
+                // Check for common Tailwind utility classes
+                const tailwindClasses = ['bg-', 'text-', 'p-', 'm-', 'w-', 'h-', 'flex', 'grid', 'rounded'];
+                const hasUtilityClasses = Array.from(document.querySelectorAll('*')).some(el => {
+                  return tailwindClasses.some(tw => el.className.includes(tw));
+                });
+                
+                // Check stylesheets for Tailwind
+                const hasInStylesheets = Array.from(document.styleSheets).some(sheet => {
+                  try {
+                    return Array.from(sheet.cssRules).some(rule => 
+                      rule.cssText.includes('tailwind') || rule.cssText.includes('--tw-')
+                    );
+                  } catch { return false; }
+                });
+                
+                return hasUtilityClasses || hasInStylesheets;
+              })(),
               bootstrap: !!document.querySelector('[class*="bootstrap"]')
             }
           }
