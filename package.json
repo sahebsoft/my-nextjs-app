@@ -1,0 +1,46 @@
+{
+  "name": "my-nextjs-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test:ai": "cross-env HEADLESS=false jest --config=jest.e2e.config.js --testNamePattern='AI'",
+    "test:ai:autonomous": "cross-env HEADLESS=false jest --config=jest.e2e.config.js e2e/ai-autonomous-testing.test.ts",
+    "test:ai:workflow": "cross-env HEADLESS=false jest --config=jest.e2e.config.js e2e/ai-complete-workflow.test.ts",
+    "test:ai:headless": "jest --config=jest.e2e.config.js --testNamePattern='AI'",
+    "test:ai:claude": "cross-env HEADLESS=false jest --config=jest.e2e.config.js e2e/claude-integration-example.test.ts",
+    "ai:run": "node run-ai-tests.js",
+    "ai:test": "node run-ai-tests.js",
+    "ai:enhanced": "node run-enhanced-ai-tests.js",
+    "ai:full": "node run-enhanced-ai-tests.js workflow",
+    "test:ai:enhanced": "cross-env HEADLESS=false jest --config=jest.e2e.config.js e2e/ai-enhanced-tests.test.ts",
+    "test:ai:visual": "cross-env HEADLESS=false jest --config=jest.e2e.config.js --testNamePattern='AI.*Enhanced|Visual|Responsive'",
+    "test:e2e": "cross-env HEADLESS=false jest --config=jest.e2e.config.js",
+    "test:e2e:headless": "jest --config=jest.e2e.config.js",
+    "test:e2e:visible": "cross-env HEADLESS=false jest --config=jest.e2e.config.js"
+  },
+  "dependencies": {
+    "next": "14.0.4",
+    "react": "^18",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "@types/jest": "^29",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10",
+    "cross-env": "^7",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.4",
+    "jest": "^29",
+    "postcss": "^8",
+    "puppeteer": "^21",
+    "tailwindcss": "^3",
+    "ts-jest": "^29",
+    "typescript": "^5"
+  }
+}

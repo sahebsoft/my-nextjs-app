@@ -1,0 +1,349 @@
+{
+  "metadata": {
+    "testRunId": "ai-test-1752583402103-vq7u495zi",
+    "timestamp": "2025-07-15T12:43:22.103Z",
+    "duration": 12903,
+    "environment": {
+      "nodeVersion": "v20.11.1",
+      "puppeteerVersion": "latest",
+      "nextjsUrl": "http://localhost:3000",
+      "userAgent": "AI-Testing-System"
+    }
+  },
+  "phases": {
+    "discovery": {
+      "phase": "discovery",
+      "status": "success",
+      "duration": 4841,
+      "applicationData": {
+        "title": "AI Store - Test Application",
+        "url": "http://localhost:3000/",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        "structure": {
+          "hasHeader": false,
+          "hasNav": true,
+          "hasMain": true,
+          "hasFooter": true,
+          "hasSidebar": false
+        },
+        "interactiveElements": {
+          "links": [
+            {
+              "text": "AIAI Store",
+              "href": "http://localhost:3000/",
+              "target": ""
+            },
+            {
+              "text": "Home",
+              "href": "http://localhost:3000/",
+              "target": ""
+            },
+            {
+              "text": "Products",
+              "href": "http://localhost:3000/products",
+              "target": ""
+            },
+            {
+              "text": "About",
+              "href": "http://localhost:3000/about",
+              "target": ""
+            },
+            {
+              "text": "Contact",
+              "href": "http://localhost:3000/contact",
+              "target": ""
+            },
+            {
+              "text": "Account",
+              "href": "http://localhost:3000/account",
+              "target": ""
+            },
+            {
+              "text": "3",
+              "href": "http://localhost:3000/cart",
+              "target": ""
+            },
+            {
+              "text": "Shop Now",
+              "href": "http://localhost:3000/products",
+              "target": ""
+            },
+            {
+              "text": "View Details",
+              "href": "http://localhost:3000/products/1",
+              "target": ""
+            },
+            {
+              "text": "View Details",
+              "href": "http://localhost:3000/products/2",
+              "target": ""
+            },
+            {
+              "text": "View Details",
+              "href": "http://localhost:3000/products/3",
+              "target": ""
+            },
+            {
+              "text": "View Details",
+              "href": "http://localhost:3000/products/4",
+              "target": ""
+            },
+            {
+              "text": "View All Products",
+              "href": "http://localhost:3000/products",
+              "target": ""
+            },
+            {
+              "text": "Contact Us",
+              "href": "http://localhost:3000/contact",
+              "target": ""
+            }
+          ],
+          "buttons": [
+            {
+              "text": "",
+              "type": "submit",
+              "disabled": false
+            },
+            {
+              "text": "",
+              "type": "submit",
+              "disabled": false
+            },
+            {
+              "text": "Add to Cart",
+              "type": "submit",
+              "disabled": false
+            },
+            {
+              "text": "Add to Cart",
+              "type": "submit",
+              "disabled": false
+            },
+            {
+              "text": "Add to Cart",
+              "type": "submit",
+              "disabled": false
+            },
+            {
+              "text": "Add to Cart",
+              "type": "submit",
+              "disabled": false
+            }
+          ],
+          "inputs": [
+            {
+              "type": "text",
+              "name": "",
+              "placeholder": "Search for products...",
+              "required": false
+            }
+          ],
+          "forms": [
+            {
+              "action": "http://localhost:3000/",
+              "method": "get",
+              "fields": 1
+            }
+          ]
+        },
+        "content": {
+          "headings": [
+            {
+              "level": "H1",
+              "text": "Welcome to AI Store"
+            },
+            {
+              "level": "H2",
+              "text": "Search Products"
+            },
+            {
+              "level": "H2",
+              "text": "Featured Products"
+            },
+            {
+              "level": "H3",
+              "text": "Wireless Headphones"
+            },
+            {
+              "level": "H3",
+              "text": "Smart Watch"
+            },
+            {
+              "level": "H3",
+              "text": "Coffee Maker"
+            },
+            {
+              "level": "H3",
+              "text": "Running Shoes"
+            },
+            {
+              "level": "H2",
+              "text": "Ready to Explore More?"
+            }
+          ],
+          "images": [
+            {
+              "src": "http://localhost:3000/api/placeholder/300/200",
+              "alt": "Wireless Headphones",
+              "width": 300,
+              "height": 200
+            },
+            {
+              "src": "http://localhost:3000/api/placeholder/300/200",
+              "alt": "Smart Watch",
+              "width": 300,
+              "height": 200
+            },
+            {
+              "src": "http://localhost:3000/api/placeholder/300/200",
+              "alt": "Coffee Maker",
+              "width": 300,
+              "height": 200
+            },
+            {
+              "src": "http://localhost:3000/api/placeholder/300/200",
+              "alt": "Running Shoes",
+              "width": 300,
+              "height": 200
+            }
+          ],
+          "paragraphs": 7,
+          "lists": 0
+        },
+        "technical": {
+          "hasJavaScript": true,
+          "frameworks": {
+            "react": false,
+            "nextjs": true,
+            "jquery": false
+          },
+          "cssFrameworks": {
+            "tailwind": false,
+            "bootstrap": false
+          }
+        }
+      },
+      "screenshots": [
+        "ai-discovery-initial"
+      ],
+      "findings": [
+        "Application title: AI Store - Test Application",
+        "Interactive elements: 14 links, 6 buttons",
+        "Content structure: 8 headings, 4 images",
+        "Framework detected: React=false, Next.js=true",
+        "Forms found: 1",
+        "Navigation structure: Header=false, Nav=true"
+      ],
+      "issues": []
+    },
+    "generation": {
+      "phase": "generation",
+      "status": "success",
+      "duration": 848,
+      "claudeAnalysis": {
+        "analysis": {
+          "ui_elements": [
+            {
+              "element": "heading",
+              "selector": "h1",
+              "text": "Main heading",
+              "testable": true,
+              "test_priority": "high"
+            }
+          ],
+          "user_flows": [
+            {
+              "flow_name": "Homepage Visit",
+              "steps": [
+                "Load page",
+                "Verify content"
+              ],
+              "test_case": "Basic homepage test",
+              "risk_level": "low"
+            }
+          ],
+          "test_cases": [
+            {
+              "test_name": "Should load homepage",
+              "test_code": "test('Should load homepage', async () => {\n  await page.goto('http://localhost:3000');\n  await page.waitForSelector('main');\n  const title = await page.title();\n  expect(title).toBeTruthy();\n});",
+              "expected_outcome": "Page loads successfully",
+              "validation_method": "Check page title exists"
+            }
+          ],
+          "issues": [],
+          "fixes": []
+        },
+        "confidence": 0.5,
+        "recommendations": [
+          "Claude integration needed for full analysis"
+        ]
+      },
+      "generatedTests": {
+        "count": 1,
+        "types": [
+          "functional",
+          "ui",
+          "accessibility",
+          "performance"
+        ],
+        "code": [
+          "test('Should load homepage', async () => {\n  await page.goto('http://localhost:3000');\n  await page.waitForSelector('main');\n  const title = await page.title();\n  expect(title).toBeTruthy();\n});"
+        ],
+        "priorities": [
+          "high"
+        ]
+      },
+      "qualityMetrics": {
+        "codeQuality": 0.5,
+        "coverage": 0.1,
+        "complexity": 0.194
+      }
+    }
+  },
+  "summary": {
+    "overallStatus": "SUCCESS",
+    "confidence": 0.5,
+    "testsGenerated": 1,
+    "testsExecuted": 0,
+    "testsPassed": 0,
+    "testsFailed": 0,
+    "issuesFound": 0,
+    "fixesGenerated": 0,
+    "screenshotsCaptured": 1
+  },
+  "performance": {
+    "totalDuration": 12903,
+    "phaseTimings": {
+      "discovery": 4841,
+      "generation": 848,
+      "execution": 0,
+      "analysis": 0,
+      "adaptation": 0,
+      "reporting": 0
+    },
+    "memoryUsage": {
+      "rss": 162312192,
+      "heapTotal": 122392576,
+      "heapUsed": 111587840,
+      "external": 9169951,
+      "arrayBuffers": 4348299
+    },
+    "cpuUsage": {
+      "user": 5140000,
+      "system": 765000
+    }
+  },
+  "insights": {
+    "strengths": [],
+    "weaknesses": [
+      "Low AI confidence suggests complex or unclear UI patterns"
+    ],
+    "improvements": [],
+    "recommendations": [
+      "Consider adding more interactive elements for better test coverage",
+      "Run tests regularly to maintain quality",
+      "Review failed tests for improvement opportunities"
+    ]
+  }
+}
