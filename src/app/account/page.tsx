@@ -13,10 +13,10 @@ export default function AccountPage() {
     confirmPassword: ''
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [errors, setErrors] = useState({})
+  const [errors, setErrors] = useState<any>({})
 
   const validateLogin = () => {
-    const newErrors = {}
+    const newErrors: any = {}
 
     if (!loginData.email.trim()) {
       newErrors.email = 'Email is required'
@@ -33,7 +33,7 @@ export default function AccountPage() {
   }
 
   const validateRegister = () => {
-    const newErrors = {}
+    const newErrors: any = {}
 
     if (!registerData.firstName.trim()) {
       newErrors.firstName = 'First name is required'
@@ -63,7 +63,7 @@ export default function AccountPage() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleLoginSubmit = async (e) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!validateLogin()) return
@@ -94,7 +94,7 @@ export default function AccountPage() {
     }
   }
 
-  const handleRegisterSubmit = async (e) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!validateRegister()) return
@@ -126,7 +126,7 @@ export default function AccountPage() {
     }
   }
 
-  const handleInputChange = (formType, field, value) => {
+  const handleInputChange = (formType: string, field: string, value: string) => {
     if (formType === 'login') {
       setLoginData(prev => ({ ...prev, [field]: value }))
     } else {
@@ -135,7 +135,7 @@ export default function AccountPage() {
     
     // Clear errors when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }))
+      setErrors((prev: any) => ({ ...prev, [field]: '' }))
     }
   }
 

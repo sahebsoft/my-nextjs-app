@@ -6,7 +6,19 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "ai:workflow": "npx ts-node --project tsconfig.node.json scripts/run-ai-workflow.ts",
+    "ai:workflow:verbose": "npx ts-node --project tsconfig.node.json scripts/run-ai-workflow.ts --verbose",
+    "ai:workflow:dev": "AI_WORKFLOW_BASE_URL=http://localhost:3000 npx ts-node --project tsconfig.node.json scripts/run-ai-workflow.ts",
+    "ai:test": "npm run ai:workflow",
+    "ai:analyze": "npm run ai:workflow --timeout 600",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:ai": "jest --selectProjects=ai-workflow",
+    "test:unit": "jest --selectProjects=unit",
+    "test:e2e": "jest tests/e2e/",
+    "test:visual": "jest tests/e2e/product-page-visual.e2e.test.ts",
+    "test:all": "jest --selectProjects=unit,ai-workflow"
   },
   "dependencies": {
     "next": "14.0.4",
@@ -14,6 +26,9 @@
     "react-dom": "^18"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^29",
     "@types/node": "^20",
     "@types/react": "^18",
@@ -23,10 +38,12 @@
     "eslint": "^8",
     "eslint-config-next": "14.0.4",
     "jest": "^29",
+    "jest-environment-jsdom": "^30.0.4",
     "postcss": "^8",
     "puppeteer": "^24.13.0",
     "tailwindcss": "^3",
     "ts-jest": "^29",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }

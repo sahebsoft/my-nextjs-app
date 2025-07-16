@@ -21,6 +21,8 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const [isImageLoading, setIsImageLoading] = useState(true)
   const [addedToCart, setAddedToCart] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [imageRetryCount, setImageRetryCount] = useState(0)
+  const [imageSrc, setImageSrc] = useState(product.image)
 
   const handleAddToCart = async () => {
     try {
@@ -61,9 +63,32 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
     }
   }
 
+  // 🤖 AI FIX: Enhanced image error handling with retry logic
   const handleImageError = () => {
-    setIsImageLoading(false)
-    setError('Image failed to load')
+    console.log(`Image failed to load for product ${product.id}, attempt ${imageRetryCount + 1}`)
+    
+    if (imageRetryCount < 3) {
+      // Retry loading the image with a slight delay
+      setTimeout(() => {
+        setImageRetryCount(prev => prev + 1)
+        setImageSrc(`${product.image}?retry=${imageRetryCount + 1}&t=${Date.now()}`)
+        setIsImageLoading(true)
+        setError(null)
+      }, 1000 * (imageRetryCount + 1)) // Exponential backoff
+    } else {
+      setIsImageLoading(false)
+      setError('Image temporarily unavailable')
+      
+      // Fall back to a basic placeholder
+      setImageSrc(`data:image/svg+xml,${encodeURIComponent(`
+        <svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="100%" height="100%" fill="#f3f4f6"/>
+          <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="#6b7280" font-family="Arial" font-size="14">
+            ${product.name}
+          </text>
+        </svg>
+      `)}`)
+    }
   }
 
   return (
@@ -82,15 +107,19 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
           </div>
         )}
         
-        {/* 🤖 AI FIX: Enhanced accessibility with proper alt text and error handling */}
+        {/* 🤖 AI FIX: Enhanced accessibility with proper alt text and retry logic */}
         <img
-          src={product.image}
+          src={imageSrc}
           alt={`${product.name} - ${product.description}. Price: $${product.price.toFixed(2)}`}
           className={`w-full h-full object-cover transition-opacity duration-300 ${
             isImageLoading ? 'opacity-0' : 'opacity-100'
           }`}
           loading={index < 2 ? "eager" : "lazy"}
-          onLoad={() => setIsImageLoading(false)}
+          onLoad={() => {
+            setIsImageLoading(false)
+            setError(null)
+            console.log(`✅ Image loaded successfully for product ${product.id}`)
+          }}
           onError={handleImageError}
         />
         

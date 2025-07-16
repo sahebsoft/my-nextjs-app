@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // In-memory contact storage (in real app, use database/email service)
-let contactSubmissions = []
+let contactSubmissions: any[] = []
 
 export async function POST(request: NextRequest) {
   try {
@@ -57,11 +57,12 @@ export async function POST(request: NextRequest) {
     console.log(`📨 Sending confirmation email to ${email}`)
     
     // Calculate expected response time based on urgency
-    const responseTime = {
+    const responseTimeMap = {
       'high': '2 hours',
       'medium': '24 hours', 
       'low': '48 hours'
-    }[urgency] || '24 hours'
+    }
+    const responseTime = responseTimeMap[urgency as keyof typeof responseTimeMap] || '24 hours'
     
     console.log(`✅ Contact submission processed: ID ${submission.id}, Urgency: ${urgency}`)
     
@@ -84,7 +85,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: false,
       error: 'Failed to process contact form',
-      message: error.message
+      message: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }
 }
