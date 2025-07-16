@@ -29,11 +29,19 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
       setError(null)
       setAddedToCart(true)
       
+      // Get or create session ID
+      let sessionId = localStorage.getItem('sessionId')
+      if (!sessionId) {
+        sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        localStorage.setItem('sessionId', sessionId)
+      }
+      
       // 🤖 AI FIX: Enhanced error handling for API calls
       const response = await fetch('/api/cart/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-session-id': sessionId
         },
         body: JSON.stringify({
           productId: product.id,
@@ -41,15 +49,22 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
         })
       })
 
-      if (response.ok) {
+      const result = await response.json()
+
+      if (response.ok && result.success) {
         console.log('Product added to cart successfully')
+        
+        // Trigger a custom event to update cart count in navigation
+        window.dispatchEvent(new CustomEvent('cart-updated', {
+          detail: { count: result.cartCount }
+        }))
         
         // Reset the button after 2 seconds
         setTimeout(() => {
           setAddedToCart(false)
         }, 2000)
       } else {
-        throw new Error('Failed to add product to cart')
+        throw new Error(result.error || 'Failed to add product to cart')
       }
     } catch (error) {
       console.error('Failed to add to cart:', error)
@@ -93,7 +108,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
 
   return (
     <article 
-      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 w-full max-w-sm mx-auto"
       role="article"
       aria-labelledby={`product-${product.id}-name`}
       aria-describedby={`product-${product.id}-description`}
@@ -110,7 +125,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
         {/* 🤖 AI FIX: Enhanced accessibility with proper alt text and retry logic */}
         <img
           src={imageSrc}
-          alt={`${product.name} - ${product.description}. Price: $${product.price.toFixed(2)}`}
+          alt={`${product.name} - ${product.description}. Price: $${Number(product.price).toFixed(2)}`}
           className={`w-full h-full object-cover transition-opacity duration-300 ${
             isImageLoading ? 'opacity-0' : 'opacity-100'
           }`}
@@ -139,14 +154,14 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
         {/* 🤖 AI FIX: Proper heading hierarchy and accessibility */}
         <h3 
           id={`product-${product.id}-name`}
-          className="text-lg font-semibold text-gray-800 mb-2"
+          className="text-lg font-semibold text-gray-800 mb-2 overflow-hidden break-words"
         >
           {product.name}
         </h3>
         
         <p 
           id={`product-${product.id}-description`}
-          className="text-gray-600 text-sm mb-3 line-clamp-2"
+          className="text-gray-600 text-sm mb-3 line-clamp-2 overflow-hidden break-words"
         >
           {product.description}
         </p>
@@ -155,9 +170,9 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
         <div className="flex items-center justify-between mb-4">
           <span 
             className="text-2xl font-bold text-blue-600"
-            aria-label={`Price: ${product.price} dollars`}
+            aria-label={`Price: ${Number(product.price)} dollars`}
           >
-            ${product.price.toFixed(2)}
+            ${Number(product.price).toFixed(2)}
           </span>
           <span className="text-sm text-gray-500">
             Free shipping

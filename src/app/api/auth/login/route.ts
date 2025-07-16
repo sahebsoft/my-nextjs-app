@@ -1,24 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-// Mock user database
-const USERS = [
-  {
-    id: 1,
-    email: 'demo@example.com',
-    password: 'password123', // In real app, this would be hashed
-    name: 'Demo User',
-    role: 'user',
-    createdAt: '2024-01-01T00:00:00.000Z'
-  },
-  {
-    id: 2,
-    email: 'admin@aistore.com',
-    password: 'admin123',
-    name: 'Admin User',
-    role: 'admin',
-    createdAt: '2024-01-01T00:00:00.000Z'
-  }
-]
+import { authenticateUser } from '@/lib/auth'
+import { validateData, LoginSchema } from '@/lib/validation'
+import { runMigrations, seedInitialData } from '@/lib/migrate'
 
 // Login attempt interface
 interface LoginAttempt {
@@ -32,23 +15,30 @@ interface LoginAttempt {
   userId?: number;
 }
 
-// In-memory login attempts storage
+// In-memory login attempts storage (for analytics)
 let loginAttempts: LoginAttempt[] = []
 
 export async function POST(request: NextRequest) {
   try {
+    // Ensure database is initialized
+    await runMigrations()
+    await seedInitialData()
+    
     const body = await request.json()
-    const { email, password } = body
+    
+    console.log('🔐 Login attempt:', { email: body.email, timestamp: new Date().toISOString() })
 
-    console.log('🔐 Login attempt:', { email, timestamp: new Date().toISOString() })
-
-    // Validate required fields
-    if (!email || !password) {
+    // Validate input data
+    const validation = validateData(LoginSchema, body)
+    if (!validation.success) {
       return NextResponse.json({
         success: false,
-        error: 'Email and password are required'
+        error: 'Validation failed',
+        details: validation.errors
       }, { status: 400 })
     }
+
+    const { email, password } = validation.data
 
     // Record login attempt
     const loginAttempt: LoginAttempt = {
@@ -60,60 +50,43 @@ export async function POST(request: NextRequest) {
       success: false
     }
 
-    // Simulate authentication delay
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // Authenticate user with database
+    const authResult = await authenticateUser(email, password)
 
-    // Find user
-    const user = USERS.find(u => u.email.toLowerCase() === email.toLowerCase())
-
-    if (!user) {
-      loginAttempt.reason = 'User not found'
+    if (!authResult.success) {
+      loginAttempt.reason = authResult.message
       loginAttempts.push(loginAttempt)
 
-      console.log(`❌ Login failed: User not found for ${email}`)
+      console.log(`❌ Login failed: ${authResult.message} for ${email}`)
 
       return NextResponse.json({
         success: false,
-        error: 'Invalid email or password'
-      }, { status: 401 })
-    }
-
-    // Check password (in real app, use bcrypt)
-    if (user.password !== password) {
-      loginAttempt.reason = 'Invalid password'
-      loginAttempts.push(loginAttempt)
-
-      console.log(`❌ Login failed: Invalid password for ${email}`)
-
-      return NextResponse.json({
-        success: false,
-        error: 'Invalid email or password'
+        error: authResult.message
       }, { status: 401 })
     }
 
     // Successful login
     loginAttempt.success = true
-    loginAttempt.userId = user.id
+    loginAttempt.userId = authResult.user!.id
     loginAttempts.push(loginAttempt)
 
-    // Create session token (in real app, use JWT or session storage)
-    const sessionToken = `session_${user.id}_${Date.now()}`
+    console.log(`✅ Login successful: ${authResult.user!.first_name} ${authResult.user!.last_name} (${authResult.user!.email})`)
 
-    console.log(`✅ Login successful: ${user.name} (${user.email})`)
-
-    // Return user data (excluding sensitive info)
+    // Return user data and JWT token
     const userResponse = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role
+      id: authResult.user!.id,
+      email: authResult.user!.email,
+      name: `${authResult.user!.first_name || ''} ${authResult.user!.last_name || ''}`.trim(),
+      firstName: authResult.user!.first_name,
+      lastName: authResult.user!.last_name,
+      role: authResult.user!.role
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Login successful',
+      message: authResult.message,
       user: userResponse,
-      sessionToken,
+      token: authResult.token,
       timestamp: new Date().toISOString(),
       analytics: {
         totalLoginAttempts: loginAttempts.length,
@@ -173,8 +146,8 @@ export async function GET(request: NextRequest) {
       recentAttempts,
       failureReasons,
       demoCredentials: {
-        email: 'demo@example.com',
-        password: 'password123'
+        message: 'Check the database for demo users or register a new account',
+        registerEndpoint: '/api/auth/register'
       },
       lastUpdated: new Date().toISOString()
     }

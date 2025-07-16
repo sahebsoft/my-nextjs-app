@@ -42,7 +42,7 @@ const FEATURED_PRODUCTS = [
 ]
 
 export default function HomePage() {
-  const [products, setProducts] = useState([])
+  const [products, setProducts] = useState<typeof FEATURED_PRODUCTS>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')

@@ -1,54 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-// In-memory contact storage (in real app, use database/email service)
-let contactSubmissions: any[] = []
+import { ContactModel } from '@/lib/models'
+import { validateData, ContactSchema } from '@/lib/validation'
+import { runMigrations } from '@/lib/migrate'
 
 export async function POST(request: NextRequest) {
   try {
+    await runMigrations()
+    
     const body = await request.json()
-    const { name, email, subject, message, urgency, timestamp } = body
     
     console.log('📧 Contact form submission received:', { 
-      name, 
-      email, 
-      subject: subject.substring(0, 50) + '...', 
-      urgency 
+      name: body.name, 
+      email: body.email, 
+      subject: body.subject?.substring(0, 50) + '...', 
+      urgency: body.urgency 
     })
     
-    // Validate required fields
-    if (!name || !email || !subject || !message) {
+    // Validate input data
+    const validation = validateData(ContactSchema, body)
+    if (!validation.success) {
       return NextResponse.json({
         success: false,
-        error: 'Missing required fields',
-        required: ['name', 'email', 'subject', 'message']
+        error: 'Validation failed',
+        details: validation.errors
       }, { status: 400 })
     }
     
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      return NextResponse.json({
-        success: false,
-        error: 'Invalid email address'
-      }, { status: 400 })
-    }
+    const { name, email, subject, message, urgency } = validation.data
     
-    // Create contact submission record
-    const submission = {
-      id: contactSubmissions.length + 1,
-      name: name.trim(),
-      email: email.toLowerCase().trim(),
-      subject: subject.trim(),
-      message: message.trim(),
-      urgency: urgency || 'medium',
-      timestamp: timestamp || new Date().toISOString(),
-      status: 'received',
-      userAgent: request.headers.get('user-agent') || 'unknown',
-      ip: request.ip || 'unknown'
-    }
-    
-    // Store submission
-    contactSubmissions.push(submission)
+    // Create contact submission in database
+    const submission = await ContactModel.create({
+      name,
+      email,
+      subject,
+      message,
+      urgency: urgency || 'medium'
+    })
     
     // Simulate email processing delay
     await new Promise(resolve => setTimeout(resolve, 800))
@@ -57,25 +44,28 @@ export async function POST(request: NextRequest) {
     console.log(`📨 Sending confirmation email to ${email}`)
     
     // Calculate expected response time based on urgency
-    const responseTimeMap = {
+    const responseTimeMap: Record<string, string> = {
       'high': '2 hours',
       'medium': '24 hours', 
       'low': '48 hours'
     }
-    const responseTime = responseTimeMap[urgency as keyof typeof responseTimeMap] || '24 hours'
+    const responseTime = responseTimeMap[urgency || 'medium'] || '24 hours'
     
     console.log(`✅ Contact submission processed: ID ${submission.id}, Urgency: ${urgency}`)
+    
+    // Get analytics
+    const analytics = await ContactModel.getAnalytics()
     
     return NextResponse.json({
       success: true,
       submissionId: submission.id,
       message: 'Your message has been received successfully',
       expectedResponse: responseTime,
-      timestamp: submission.timestamp,
+      timestamp: submission.created_at,
       confirmationSent: true,
       analytics: {
-        totalSubmissions: contactSubmissions.length,
-        averageResponseTime: responseTime
+        totalSubmissions: analytics.totalSubmissions,
+        averageResponseTime: analytics.averageResponseTime
       }
     })
     
@@ -93,47 +83,55 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   console.log('📊 Contact submissions analytics requested')
   
-  // Get query parameters
-  const { searchParams } = new URL(request.url)
-  const limit = parseInt(searchParams.get('limit') || '10')
-  const urgency = searchParams.get('urgency')
-  
-  let filteredSubmissions = [...contactSubmissions]
-  
-  // Filter by urgency if specified
-  if (urgency) {
-    filteredSubmissions = filteredSubmissions.filter(sub => sub.urgency === urgency)
-  }
-  
-  // Calculate analytics
-  const totalSubmissions = contactSubmissions.length
-  const urgencyBreakdown = {
-    high: contactSubmissions.filter(s => s.urgency === 'high').length,
-    medium: contactSubmissions.filter(s => s.urgency === 'medium').length,
-    low: contactSubmissions.filter(s => s.urgency === 'low').length
-  }
-  
-  const recentSubmissions = filteredSubmissions
-    .slice(-limit)
-    .map(sub => ({
-      id: sub.id,
-      name: sub.name,
-      subject: sub.subject,
-      urgency: sub.urgency,
-      timestamp: sub.timestamp,
-      status: sub.status
-    }))
-  
-  console.log(`📈 Contact analytics: ${totalSubmissions} total submissions`)
-  
-  return NextResponse.json({
-    success: true,
-    analytics: {
-      totalSubmissions,
-      urgencyBreakdown,
-      recentSubmissions,
-      averagePerDay: Math.round(totalSubmissions / 7), // Simulate weekly average
-      lastUpdated: new Date().toISOString()
+  try {
+    await runMigrations()
+    
+    // Get query parameters
+    const { searchParams } = new URL(request.url)
+    const urgency = searchParams.get('urgency')
+    
+    // Get submissions from database
+    const submissions = await ContactModel.findAll({ urgency: urgency || undefined })
+    const analytics = await ContactModel.getAnalytics()
+    
+    // Calculate urgency breakdown
+    const urgencyBreakdown = {
+      high: submissions.filter(s => s.urgency === 'high').length,
+      medium: submissions.filter(s => s.urgency === 'medium').length,
+      low: submissions.filter(s => s.urgency === 'low').length
     }
-  })
+    
+    // Recent submissions (last 10)
+    const recentSubmissions = submissions
+      .slice(-10)
+      .map(sub => ({
+        id: sub.id,
+        name: sub.name,
+        subject: sub.subject,
+        urgency: sub.urgency,
+        timestamp: sub.created_at,
+        status: sub.status
+      }))
+    
+    console.log(`📈 Contact analytics: ${analytics.totalSubmissions} total submissions`)
+    
+    return NextResponse.json({
+      success: true,
+      analytics: {
+        totalSubmissions: analytics.totalSubmissions,
+        urgencyBreakdown,
+        recentSubmissions,
+        averagePerDay: Math.round(analytics.totalSubmissions / 7),
+        averageResponseTime: analytics.averageResponseTime,
+        lastUpdated: new Date().toISOString()
+      }
+    })
+  } catch (error) {
+    console.error('❌ Contact analytics error:', error)
+    
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to fetch contact analytics'
+    }, { status: 500 })
+  }
 }

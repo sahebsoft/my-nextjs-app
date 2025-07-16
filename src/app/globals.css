@@ -25,3 +25,57 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+/* Global overflow fixes */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* Fix for line-clamp and text truncation */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Container overflow fixes */
+.container {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Prevent images from overflowing */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Fix for sticky elements */
+.sticky {
+  position: -webkit-sticky;
+  position: sticky;
+}
+
+/* General overflow prevention */
+.overflow-hidden {
+  overflow: hidden;
+}
+
+/* Flex container fixes */
+.flex {
+  min-width: 0;
+}
+
+.flex-1 {
+  min-width: 0;
+}

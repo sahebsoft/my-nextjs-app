@@ -16,83 +16,9 @@ interface Product {
   reviews?: number;
   inStock?: boolean;
   features?: string[];
+  stock?: number;
+  status?: string;
 }
-
-// Mock product database
-const PRODUCTS: Product[] = [
-  {
-    id: 1,
-    name: "Wireless Headphones",
-    price: 199.99,
-    image: "/api/placeholder/500/400",
-    description: "High-quality wireless headphones with noise cancellation technology. Perfect for music lovers who want crystal clear sound and all-day comfort.",
-    category: "electronics",
-    rating: 4.5,
-    reviews: 128,
-    inStock: true,
-    features: [
-      "Active Noise Cancellation",
-      "30-hour battery life",
-      "Bluetooth 5.0 connectivity",
-      "Fast charging (5 min = 2 hours)",
-      "Premium leather ear cushions"
-    ]
-  },
-  {
-    id: 2,
-    name: "Smart Watch",
-    price: 299.99,
-    image: "/api/placeholder/500/400",
-    description: "Feature-rich smartwatch with health monitoring, GPS tracking, and smartphone integration. Track your fitness goals and stay connected.",
-    category: "electronics",
-    rating: 4.3,
-    reviews: 94,
-    inStock: true,
-    features: [
-      "Heart rate monitoring",
-      "GPS tracking",
-      "Water resistant (50m)",
-      "7-day battery life",
-      "Health & fitness apps"
-    ]
-  },
-  {
-    id: 3,
-    name: "Coffee Maker",
-    price: 89.99,
-    image: "/api/placeholder/500/400",
-    description: "Automatic coffee maker with programmable settings. Brew the perfect cup every morning with customizable strength and temperature controls.",
-    category: "home",
-    rating: 4.7,
-    reviews: 203,
-    inStock: true,
-    features: [
-      "Programmable brewing",
-      "12-cup capacity",
-      "Auto shut-off",
-      "Thermal carafe",
-      "Water filtration system"
-    ]
-  },
-  {
-    id: 4,
-    name: "Running Shoes",
-    price: 129.99,
-    image: "/api/placeholder/500/400",
-    description: "Comfortable running shoes with excellent support and cushioning. Designed for runners who demand performance and comfort mile after mile.",
-    category: "sports",
-    rating: 4.4,
-    reviews: 167,
-    inStock: true,
-    features: [
-      "Responsive cushioning",
-      "Breathable mesh upper",
-      "Durable rubber outsole",
-      "Arch support technology",
-      "Lightweight design"
-    ]
-  }
-]
 
 export default function ProductDetailPage() {
   const params = useParams()
@@ -106,25 +32,24 @@ export default function ProductDetailPage() {
   const [addedToCart, setAddedToCart] = useState(false)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
 
-  // Update page title when product loads
-  useEffect(() => {
-    if (product) {
-      document.title = `${product.name} - AI Store`
-    }
-  }, [product])
 
   // Load product data
   useEffect(() => {
     const loadProduct = async () => {
       setLoading(true)
       try {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 800))
+        const response = await fetch(`/api/products/${productId}`)
+        const data = await response.json()
         
-        const foundProduct = PRODUCTS.find(p => p.id === productId)
-        setProduct(foundProduct || null)
+        if (data.success) {
+          setProduct(data.product)
+        } else {
+          console.error('Failed to load product:', data.error)
+          setProduct(null)
+        }
       } catch (error) {
         console.error('Failed to load product:', error)
+        setProduct(null)
       } finally {
         setLoading(false)
       }
@@ -143,36 +68,17 @@ export default function ProductDetailPage() {
     
     try {
       // Add to cart using context
-      addToCart({
+      await addToCart({
         id: product.id,
         name: product.name,
         price: product.price,
         image: product.image
       }, quantity)
 
-      // Simulate API call for backend sync
-      const response = await fetch('/api/cart/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          productId: product.id,
-          quantity: quantity
-        })
-      })
-
-      if (response.ok) {
-        setAddedToCart(true)
-        setTimeout(() => setAddedToCart(false), 3000)
-      } else {
-        throw new Error('Failed to sync with backend')
-      }
-    } catch (error) {
-      console.error('Add to cart failed:', error)
-      // Still show success since local cart was updated
       setAddedToCart(true)
       setTimeout(() => setAddedToCart(false), 3000)
+    } catch (error) {
+      console.error('Add to cart failed:', error)
     } finally {
       setAddingToCart(false)
     }
@@ -297,7 +203,7 @@ export default function ProductDetailPage() {
             {/* Price */}
             <div>
               <span className="text-4xl font-bold text-blue-600 price" data-testid="product-price">
-                ${product.price.toFixed(2)}
+                ${parseFloat(product.price.toString()).toFixed(2)}
               </span>
               <span className="text-gray-500 ml-2">Free shipping on orders over $100</span>
             </div>
@@ -416,40 +322,89 @@ export default function ProductDetailPage() {
         </div>
 
         {/* Related Products Section */}
-        <div className="mt-16">
-          <h2 className="text-2xl font-bold text-gray-800 mb-8">Related Products</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {PRODUCTS
-              .filter(p => p.category === product.category && p.id !== product.id)
-              .slice(0, 3)
-              .map(relatedProduct => (
-                <Link 
-                  key={relatedProduct.id}
-                  href={`/products/${relatedProduct.id}`}
-                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
-                >
-                  <img
-                    src={relatedProduct.image}
-                    alt={relatedProduct.name}
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="p-4">
-                    <h3 className="font-semibold text-gray-800 mb-2">{relatedProduct.name}</h3>
-                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">{relatedProduct.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-lg font-bold text-blue-600">
-                        ${relatedProduct.price.toFixed(2)}
-                      </span>
-                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                        {relatedProduct.category}
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              ))
-            }
-          </div>
+        <RelatedProducts currentProduct={product} />
+      </div>
+    </div>
+  )
+}
+
+interface RelatedProductsProps {
+  currentProduct: Product
+}
+
+function RelatedProducts({ currentProduct }: RelatedProductsProps) {
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchRelatedProducts = async () => {
+      try {
+        const response = await fetch(`/api/products?category=${currentProduct.category}`)
+        const data = await response.json()
+        
+        if (data.success) {
+          // Filter out current product and limit to 3
+          const filtered = data.products
+            .filter((p: Product) => p.id !== currentProduct.id)
+            .slice(0, 3)
+          setRelatedProducts(filtered)
+        }
+      } catch (error) {
+        console.error('Failed to load related products:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchRelatedProducts()
+  }, [currentProduct.category, currentProduct.id])
+
+  if (loading) {
+    return (
+      <div className="mt-16">
+        <h2 className="text-2xl font-bold text-gray-800 mb-8">Related Products</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="bg-gray-300 rounded-lg animate-pulse h-80"></div>
+          ))}
         </div>
+      </div>
+    )
+  }
+
+  if (relatedProducts.length === 0) {
+    return null
+  }
+
+  return (
+    <div className="mt-16">
+      <h2 className="text-2xl font-bold text-gray-800 mb-8">Related Products</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {relatedProducts.map(relatedProduct => (
+          <Link 
+            key={relatedProduct.id}
+            href={`/products/${relatedProduct.id}`}
+            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+          >
+            <img
+              src={relatedProduct.image}
+              alt={relatedProduct.name}
+              className="w-full h-48 object-cover"
+            />
+            <div className="p-4">
+              <h3 className="font-semibold text-gray-800 mb-2">{relatedProduct.name}</h3>
+              <p className="text-gray-600 text-sm mb-3 line-clamp-2">{relatedProduct.description}</p>
+              <div className="flex items-center justify-between">
+                <span className="text-lg font-bold text-blue-600">
+                  ${parseFloat(relatedProduct.price.toString()).toFixed(2)}
+                </span>
+                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                  {relatedProduct.category}
+                </span>
+              </div>
+            </div>
+          </Link>
+        ))}
       </div>
     </div>
   )

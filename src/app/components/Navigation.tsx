@@ -1,14 +1,33 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useCart } from '../contexts/CartContext'
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [cartCount, setCartCount] = useState(0)
   const pathname = usePathname()
   const { getItemCount } = useCart()
+
+  // Update cart count when context changes
+  useEffect(() => {
+    setCartCount(getItemCount())
+  }, [getItemCount])
+
+  // Listen for cart updates from product cards
+  useEffect(() => {
+    const handleCartUpdate = (event: CustomEvent) => {
+      setCartCount(event.detail.count)
+    }
+
+    window.addEventListener('cart-updated', handleCartUpdate as EventListener)
+    
+    return () => {
+      window.removeEventListener('cart-updated', handleCartUpdate as EventListener)
+    }
+  }, [])
 
   const navLinks = [
     { href: '/', label: 'Home' },
@@ -59,7 +78,7 @@ export default function Navigation() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8" />
               </svg>
               <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                {getItemCount()}
+                {cartCount}
               </span>
             </Link>
           </div>
@@ -98,7 +117,7 @@ export default function Navigation() {
                   Search
                 </button>
                 <Link href="/cart" className="text-gray-700 hover:text-blue-600 transition-colors">
-                  Cart ({getItemCount()})
+                  Cart ({cartCount})
                 </Link>
               </div>
             </div>

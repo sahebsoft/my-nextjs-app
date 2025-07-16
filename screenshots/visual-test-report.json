@@ -1,0 +1,121 @@
+{
+  "timestamp": "2025-07-16T20:09:56.283Z",
+  "baseUrl": "http://localhost:3100",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "results": [
+    {
+      "name": "homepage",
+      "url": "/",
+      "description": "Homepage with featured products",
+      "status": "success",
+      "screenshot": "screenshots/homepage.png",
+      "issues": [],
+      "metrics": {
+        "loadTime": 0,
+        "domContentLoaded": 0.09999990463256836,
+        "firstPaint": 144,
+        "firstContentfulPaint": 144
+      },
+      "timestamp": "2025-07-16T20:09:36.387Z"
+    },
+    {
+      "name": "products",
+      "url": "/products",
+      "description": "Products catalog page",
+      "status": "success",
+      "screenshot": "screenshots/products.png",
+      "issues": [],
+      "metrics": {
+        "loadTime": 0,
+        "domContentLoaded": 0,
+        "firstPaint": 76,
+        "firstContentfulPaint": 76
+      },
+      "timestamp": "2025-07-16T20:09:39.476Z"
+    },
+    {
+      "name": "cart",
+      "url": "/cart",
+      "description": "Shopping cart page",
+      "status": "success",
+      "screenshot": "screenshots/cart.png",
+      "issues": [],
+      "metrics": {
+        "loadTime": 0,
+        "domContentLoaded": 0.09999990463256836,
+        "firstPaint": 68,
+        "firstContentfulPaint": 68
+      },
+      "timestamp": "2025-07-16T20:09:43.068Z"
+    },
+    {
+      "name": "about",
+      "url": "/about",
+      "description": "About page",
+      "status": "success",
+      "screenshot": "screenshots/about.png",
+      "issues": [],
+      "metrics": {
+        "loadTime": 0,
+        "domContentLoaded": 0.20000004768371582,
+        "firstPaint": 84,
+        "firstContentfulPaint": 84
+      },
+      "timestamp": "2025-07-16T20:09:46.768Z"
+    },
+    {
+      "name": "contact",
+      "url": "/contact",
+      "description": "Contact form page",
+      "status": "success",
+      "screenshot": "screenshots/contact.png",
+      "issues": [],
+      "metrics": {
+        "loadTime": 0,
+        "domContentLoaded": 0,
+        "firstPaint": 80,
+        "firstContentfulPaint": 80
+      },
+      "timestamp": "2025-07-16T20:09:50.369Z"
+    },
+    {
+      "name": "account",
+      "url": "/account",
+      "description": "Account/login page",
+      "status": "success",
+      "screenshot": "screenshots/account.png",
+      "issues": [],
+      "metrics": {
+        "loadTime": 0,
+        "domContentLoaded": 0.09999990463256836,
+        "firstPaint": 72,
+        "firstContentfulPaint": 72
+      },
+      "timestamp": "2025-07-16T20:09:53.351Z"
+    },
+    {
+      "name": "checkout",
+      "url": "/checkout",
+      "description": "Checkout page",
+      "status": "success",
+      "screenshot": "screenshots/checkout.png",
+      "issues": [],
+      "metrics": {
+        "loadTime": 0,
+        "domContentLoaded": 0,
+        "firstPaint": 68,
+        "firstContentfulPaint": 68
+      },
+      "timestamp": "2025-07-16T20:09:56.283Z"
+    }
+  ],
+  "summary": {
+    "total": 7,
+    "passed": 7,
+    "failed": 0,
+    "totalIssues": 0
+  }
+}

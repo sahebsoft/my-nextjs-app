@@ -1,4 +1,13 @@
 {
   "/page": "app/page.js",
-  "/api/placeholder/[...dimensions]/route": "app/api/placeholder/[...dimensions]/route.js"
+  "/checkout/page": "app/checkout/page.js",
+  "/products/[id]/page": "app/products/[id]/page.js",
+  "/contact/page": "app/contact/page.js",
+  "/account/page": "app/account/page.js",
+  "/api/cart/route": "app/api/cart/route.js",
+  "/api/placeholder/[...dimensions]/route": "app/api/placeholder/[...dimensions]/route.js",
+  "/products/page": "app/products/page.js",
+  "/api/products/route": "app/api/products/route.js",
+  "/cart/page": "app/cart/page.js",
+  "/about/page": "app/about/page.js"
 }

@@ -5,20 +5,11 @@ import Link from 'next/link'
 import { useCart } from '../contexts/CartContext'
 
 export default function CartPage() {
-  const { items: cartItems, updateQuantity, removeFromCart } = useCart()
-  const [loading, setLoading] = useState(true)
+  const { items: cartItems, updateQuantity, removeFromCart, isLoading, error } = useCart()
   const [isUpdating, setIsUpdating] = useState(false)
   const [promoCode, setPromoCode] = useState('')
   const [promoDiscount, setPromoDiscount] = useState(0)
   const [promoError, setPromoError] = useState('')
-
-  // Remove loading state when cart items are available
-  useEffect(() => {
-    // Only show loading if we're still waiting for cart data
-    if (cartItems !== undefined) {
-      setLoading(false)
-    }
-  }, [cartItems])
 
   // Calculate totals
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
@@ -28,19 +19,16 @@ export default function CartPage() {
   const total = subtotal + shipping + tax - discount
 
   // Update quantity with context
-  const updateQuantityHandler = async (itemId: string, newQuantity: number) => {
+  const updateQuantityHandler = async (itemId: number, newQuantity: number) => {
     if (newQuantity < 1) {
-      removeFromCart(itemId)
+      await removeFromCart(itemId)
       return
     }
 
     setIsUpdating(true)
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
-      updateQuantity(itemId, newQuantity)
+      await updateQuantity(itemId, newQuantity)
     } catch (error) {
       console.error('Failed to update quantity:', error)
       alert('Failed to update item quantity. Please try again.')
@@ -50,14 +38,11 @@ export default function CartPage() {
   }
 
   // Remove item from cart with context
-  const removeItemHandler = async (itemId: string) => {
+  const removeItemHandler = async (itemId: number) => {
     setIsUpdating(true)
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
-      removeFromCart(itemId)
+      await removeFromCart(itemId)
     } catch (error) {
       console.error('Failed to remove item:', error)
       alert('Failed to remove item. Please try again.')
@@ -107,11 +92,11 @@ export default function CartPage() {
       return
     }
     
-    // In a real app, this would navigate to checkout
-    alert('Proceeding to checkout... (This is a demo)')
+    // Navigate to checkout page
+    window.location.href = '/checkout'
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
@@ -139,6 +124,31 @@ export default function CartPage() {
                 <div className="bg-gray-300 h-4 rounded"></div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+            <div className="text-red-600 mb-4">
+              <svg className="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h2 className="text-xl font-semibold">Error Loading Cart</h2>
+            </div>
+            <p className="text-red-700 mb-4">{error}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Try Again
+            </button>
           </div>
         </div>
       </div>

@@ -13,8 +13,6 @@ e2e/reports/
 
 # next.js
 /.next/
-/.next-dev
-/.next-build
 /out/
 
 # production
@@ -38,3 +36,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.next*/

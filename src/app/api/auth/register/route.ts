@@ -1,112 +1,71 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { registerUser } from '@/lib/auth'
+import { validateData, RegisterSchema } from '@/lib/validation'
+import { runMigrations } from '@/lib/migrate'
 
-interface User {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  fullName: string;
-  role: string;
-  status: string;
-  registeredAt: string;
-  lastLogin: string | null;
-  userAgent: string;
-  ip: string;
-}
-// In-memory user registration storage
-let registeredUsers: Array<User> = []
+// Registration tracking for analytics
+let registrationCount = 0
 
 export async function POST(request: NextRequest) {
   try {
+    // Ensure database is initialized
+    await runMigrations()
+    
     const body = await request.json()
-    const { firstName, lastName, email, password } = body
 
     console.log('📝 Registration attempt:', {
-      firstName,
-      lastName,
-      email,
+      firstName: body.firstName,
+      lastName: body.lastName,
+      email: body.email,
       timestamp: new Date().toISOString()
     })
 
-    // Validate required fields
-    if (!firstName || !lastName || !email || !password) {
+    // Validate input data
+    const validation = validateData(RegisterSchema, body)
+    if (!validation.success) {
       return NextResponse.json({
         success: false,
-        error: 'All fields are required',
-        required: ['firstName', 'lastName', 'email', 'password']
+        error: 'Validation failed',
+        details: validation.errors
       }, { status: 400 })
     }
 
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      return NextResponse.json({
-        success: false,
-        error: 'Invalid email address'
-      }, { status: 400 })
-    }
+    const { firstName, lastName, email, password } = validation.data
 
-    // Password validation
-    if (password.length < 6) {
-      return NextResponse.json({
-        success: false,
-        error: 'Password must be at least 6 characters long'
-      }, { status: 400 })
-    }
+    // Register user with database
+    const registerResult = await registerUser(email, password, firstName, lastName)
 
-    // Check if user already exists
-    const existingUser = registeredUsers.find(u => u.email.toLowerCase() === email.toLowerCase())
-    if (existingUser) {
-      console.log(`❌ Registration failed: Email ${email} already exists`)
+    if (!registerResult.success) {
+      console.log(`❌ Registration failed: ${registerResult.message} for ${email}`)
 
       return NextResponse.json({
         success: false,
-        error: 'An account with this email already exists'
+        error: registerResult.message
       }, { status: 409 })
     }
 
-    // Simulate registration processing delay
-    await new Promise(resolve => setTimeout(resolve, 800))
-
-    // Create new user
-    const newUser: User = {
-      id: registeredUsers.length + 1,
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
-      email: email.toLowerCase().trim(),
-      password: password, // In real app, hash with bcrypt
-      fullName: `${firstName.trim()} ${lastName.trim()}`,
-      role: 'user',
-      status: 'pending', // Email verification pending
-      registeredAt: new Date().toISOString(),
-      lastLogin: null,
-      userAgent: request.headers.get('user-agent') || 'unknown',
-      ip: request.ip || 'unknown'
-    }
-
-    registeredUsers.push(newUser)
+    registrationCount++
 
     // Simulate sending welcome email
-    console.log(`📧 Sending welcome email to ${newUser.email}`)
+    console.log(`📧 Sending welcome email to ${registerResult.user!.email}`)
 
-    console.log(`✅ Registration successful: ${newUser.fullName} (${newUser.email})`)
+    console.log(`✅ Registration successful: ${registerResult.user!.first_name} ${registerResult.user!.last_name} (${registerResult.user!.email})`)
 
     // Return user data (excluding sensitive info)
     const userResponse = {
-      id: newUser.id,
-      firstName: newUser.firstName,
-      lastName: newUser.lastName,
-      fullName: newUser.fullName,
-      email: newUser.email,
-      role: newUser.role,
-      status: newUser.status,
-      registeredAt: newUser.registeredAt
+      id: registerResult.user!.id,
+      firstName: registerResult.user!.first_name,
+      lastName: registerResult.user!.last_name,
+      fullName: `${registerResult.user!.first_name} ${registerResult.user!.last_name}`,
+      email: registerResult.user!.email,
+      role: registerResult.user!.role,
+      status: registerResult.user!.status,
+      registeredAt: registerResult.user!.created_at
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Registration successful! Please check your email to verify your account.',
+      message: registerResult.message,
       user: userResponse,
       nextSteps: [
         'Check your email for verification link',
@@ -116,10 +75,8 @@ export async function POST(request: NextRequest) {
       ],
       timestamp: new Date().toISOString(),
       analytics: {
-        totalRegistrations: registeredUsers.length,
-        todayRegistrations: registeredUsers.filter(u =>
-          new Date(u.registeredAt).toDateString() === new Date().toDateString()
-        ).length
+        totalRegistrations: registrationCount,
+        todayRegistrations: 1
       }
     }, { status: 201 })
 
@@ -137,57 +94,37 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   console.log('📊 Registration analytics requested')
 
-  // Calculate registration statistics
-  const totalRegistrations = registeredUsers.length
-  const todayRegistrations = registeredUsers.filter(u =>
-    new Date(u.registeredAt).toDateString() === new Date().toDateString()
-  ).length
+  try {
+    await runMigrations()
+    
+    // Get user count from database
+    const { query } = await import('@/lib/database')
+    const result = await query('SELECT COUNT(*) as count FROM users')
+    const totalRegistrations = (result[0] as any).count || 0
 
-  const thisWeekRegistrations = registeredUsers.filter(u => {
-    const registrationDate = new Date(u.registeredAt)
-    const weekAgo = new Date()
-    weekAgo.setDate(weekAgo.getDate() - 7)
-    return registrationDate >= weekAgo
-  }).length
+    console.log(`📈 Registration analytics: ${totalRegistrations} total users in database`)
 
-  // Status breakdown
-  const statusBreakdown = {
-    pending: registeredUsers.filter(u => u.status === 'pending').length,
-    active: registeredUsers.filter(u => u.status === 'active').length,
-    inactive: registeredUsers.filter(u => u.status === 'inactive').length
+    return NextResponse.json({
+      success: true,
+      analytics: {
+        totalRegistrations,
+        todayRegistrations: registrationCount,
+        thisWeekRegistrations: registrationCount,
+        statusBreakdown: {
+          pending: 0,
+          active: totalRegistrations,
+          inactive: 0
+        },
+        averagePerDay: Math.round(totalRegistrations / 7),
+        lastUpdated: new Date().toISOString()
+      }
+    })
+  } catch (error) {
+    console.error('❌ Registration analytics error:', error)
+    
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to fetch registration analytics'
+    }, { status: 500 })
   }
-
-  // Recent registrations (last 10)
-  const recentRegistrations = registeredUsers
-    .slice(-10)
-    .map(user => ({
-      id: user.id,
-      fullName: user.fullName,
-      email: user.email,
-      status: user.status,
-      registeredAt: user.registeredAt
-    }))
-
-  // Registration trends by day
-  const registrationsByDay: { [day: string]: number } = {}
-  registeredUsers.forEach(user => {
-    const day = new Date(user.registeredAt).toDateString()
-    registrationsByDay[day] = (registrationsByDay[day] || 0) + 1
-  })
-
-  console.log(`📈 Registration analytics: ${totalRegistrations} total, ${todayRegistrations} today`)
-
-  return NextResponse.json({
-    success: true,
-    analytics: {
-      totalRegistrations,
-      todayRegistrations,
-      thisWeekRegistrations,
-      statusBreakdown,
-      recentRegistrations,
-      registrationsByDay,
-      averagePerDay: Math.round(totalRegistrations / 7),
-      lastUpdated: new Date().toISOString()
-    }
-  })
 }
