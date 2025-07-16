@@ -3,22 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3100",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "ai:workflow": "npx ts-node --project tsconfig.node.json scripts/run-ai-workflow.ts",
-    "ai:workflow:verbose": "npx ts-node --project tsconfig.node.json scripts/run-ai-workflow.ts --verbose",
-    "ai:workflow:dev": "AI_WORKFLOW_BASE_URL=http://localhost:3000 npx ts-node --project tsconfig.node.json scripts/run-ai-workflow.ts",
-    "ai:test": "npm run ai:workflow",
-    "ai:analyze": "npm run ai:workflow --timeout 600",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:ai": "jest --selectProjects=ai-workflow",
-    "test:unit": "jest --selectProjects=unit",
-    "test:e2e": "jest tests/e2e/",
-    "test:visual": "jest tests/e2e/product-page-visual.e2e.test.ts",
-    "test:all": "jest --selectProjects=unit,ai-workflow"
+    "start": "next start -p 3000",
+    "lint": "next lint"
   },
   "dependencies": {
     "next": "14.0.4",
